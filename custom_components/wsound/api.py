@@ -20,11 +20,9 @@ class WSoundApiClient:
 
     @property
     def base_url(self) -> str:
-        # host peut être wsound-b3f8.local
         return f"http://{self._host}:{self._port}"
 
     async def get_state(self) -> dict[str, Any]:
-        # GET /json/state
         url = f"{self.base_url}/json/state"
         try:
             async with self._session.get(url, timeout=10) as resp:
@@ -38,7 +36,6 @@ class WSoundApiClient:
 
     @staticmethod
     def parse_led_is_on(state_json: dict[str, Any]) -> bool:
-        # attendu: {"led":{"state":"off"}} etc
         led = state_json.get("led", {})
         if isinstance(led, dict):
             v = led.get("state")
@@ -47,15 +44,12 @@ class WSoundApiClient:
         return False
 
     async def set_led(self, on: bool) -> dict[str, Any]:
-        # POST /api/led?state=on|off
         state = "on" if on else "off"
         url = f"{self.base_url}/api/led"
         params = {"state": state}
-
         try:
             async with self._session.post(url, params=params, timeout=10) as resp:
                 resp.raise_for_status()
-                # renvoie {"ok":true,"state":"off"}
                 data = await resp.json()
                 if not isinstance(data, dict):
                     raise WSoundApiError("Invalid JSON (expected object)")
@@ -63,4 +57,60 @@ class WSoundApiClient:
                     raise WSoundApiError(f"Device returned ok={data.get('ok')}")
                 return data
         except (ClientError, asyncio.TimeoutError, ValueError) as e:
+            raise WSoundApiError(str(e)) from e
+
+    async def apply_defaults(self, folder: str, duration: int, fade: int, volume: int) -> dict[str, Any]:
+        url = f"{self.base_url}/api/config/defaults"
+        params = {
+            "folder": folder,
+            "duration": int(duration),
+            "fade": int(fade),
+            "volume": int(volume),
+        }
+        try:
+            async with self._session.post(url, params=params, timeout=10) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+                if isinstance(data, dict) and data.get("ok") is False:
+                    raise WSoundApiError("apply_defaults failed")
+                return data if isinstance(data, dict) else {"ok": True}
+        except (ClientError, asyncio.TimeoutError, ValueError) as e:
+            raise WSoundApiError(str(e)) from e
+
+    async def scenario_start(self, folder: str | None = None, duration: int | None = None,
+                             fade: int | None = None, volume: int | None = None) -> dict[str, Any]:
+        url = f"{self.base_url}/api/scenario/start"
+        params = {}
+        if folder is not None:
+            params["folder"] = folder
+        if duration is not None:
+            params["duration"] = int(duration)
+        if fade is not None:
+            params["fade"] = int(fade)
+        if volume is not None:
+            params["volume"] = int(volume)
+
+        try:
+            async with self._session.post(url, params=params or None, timeout=10) as resp:
+                resp.raise_for_status()
+                # selon ton firmware, ça peut renvoyer du JSON ou juste ok
+                try:
+                    data = await resp.json()
+                    return data if isinstance(data, dict) else {"ok": True}
+                except Exception:
+                    return {"ok": True}
+        except (ClientError, asyncio.TimeoutError) as e:
+            raise WSoundApiError(str(e)) from e
+
+    async def scenario_stop(self) -> dict[str, Any]:
+        url = f"{self.base_url}/api/scenario/stop"
+        try:
+            async with self._session.post(url, timeout=10) as resp:
+                resp.raise_for_status()
+                try:
+                    data = await resp.json()
+                    return data if isinstance(data, dict) else {"ok": True}
+                except Exception:
+                    return {"ok": True}
+        except (ClientError, asyncio.TimeoutError) as e:
             raise WSoundApiError(str(e)) from e

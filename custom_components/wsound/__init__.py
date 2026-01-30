@@ -20,10 +20,14 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
 
     client = WSoundApiClient(hass, host, port)
     coordinator = WSoundCoordinator(hass, client)
-
     await coordinator.async_config_entry_first_refresh()
 
-    hass.data[DOMAIN][entry.entry_id] = {"client": client, "coordinator": coordinator}
+    # settings = valeurs UI HA (folder/duration/fade/volume) gérées par entités Restore*
+    hass.data[DOMAIN][entry.entry_id] = {
+        "client": client,
+        "coordinator": coordinator,
+        "settings": {},  # rempli par select/number entités
+    }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
