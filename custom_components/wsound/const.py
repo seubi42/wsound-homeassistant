@@ -1,0 +1,2 @@
+DOMAIN = "wsound"
+PLATFORMS = ["switch"]

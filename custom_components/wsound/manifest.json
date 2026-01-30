@@ -1,0 +1,12 @@
+{
+  "domain": "wsound",
+  "name": "WSound",
+  "version": "0.1.0",
+  "documentation": "https://github.com/seubi42/wsound-homeassistant",
+  "issue_tracker": "https://github.com/seubi42/wsound-homeassistant/issues",
+  "codeowners": [ "@seubi42" ],
+  "requirements": [],
+  "dependencies": [],
+  "iot_class": "local_polling",
+  "config_flow": true
+}
