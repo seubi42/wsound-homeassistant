@@ -93,7 +93,7 @@ class WSoundApiClient:
         try:
             async with self._session.post(url, params=params or None, timeout=10) as resp:
                 resp.raise_for_status()
-                # selon ton firmware, ça peut renvoyer du JSON ou juste ok
+                # selon ton firmware, Ã§a peut renvoyer du JSON ou juste ok
                 try:
                     data = await resp.json()
                     return data if isinstance(data, dict) else {"ok": True}

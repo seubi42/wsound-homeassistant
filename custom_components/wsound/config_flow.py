@@ -25,7 +25,7 @@ class WSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except Exception:
                 errors["base"] = "unknown"
             else:
-                # Unique ID simple (tu pourras l’améliorer plus tard avec un /json/info)
+                # Unique ID simple (tu pourras lâ€™amÃ©liorer plus tard avec un /json/info)
                 await self.async_set_unique_id(f"wsound_{host}_{port}")
                 self._abort_if_unique_id_configured()
 
