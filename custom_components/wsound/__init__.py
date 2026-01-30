@@ -8,11 +8,13 @@ from .coordinator import WSoundCoordinator
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Initialisation globale du domaine."""
     hass.data.setdefault(DOMAIN, {})
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
+    """Setup d’un appareil WSound."""
     hass.data.setdefault(DOMAIN, {})
 
     host = entry.data[CONF_HOST]
@@ -20,13 +22,18 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
 
     client = WSoundApiClient(hass, host, port)
     coordinator = WSoundCoordinator(hass, client)
+
+    # Premier refresh pour remplir coordinator.data immédiatement
     await coordinator.async_config_entry_first_refresh()
 
-    # settings = valeurs UI HA (folder/duration/fade/volume) gérées par entités Restore*
     hass.data[DOMAIN][entry.entry_id] = {
         "client": client,
         "coordinator": coordinator,
-        "settings": {},  # rempli par select/number entités
+        # settings = valeurs courantes des select/number (préparation)
+        "settings": {},
+        # infos device
+        "host": host,
+        "port": port,
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -34,6 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry) -> bool:
+    """Unload propre de l’intégration."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id, None)
