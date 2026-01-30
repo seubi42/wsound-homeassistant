@@ -1,3 +1,19 @@
 {
-  "title": "WSound"
+  "title": "WSound",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to WSound",
+        "description": "Enter the device host/IP and port.",
+        "data": {
+          "host": "Host / IP",
+          "port": "Port"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the device.",
+      "unknown": "Unexpected error."
+    }
+  }
 }

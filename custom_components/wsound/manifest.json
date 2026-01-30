@@ -1,7 +1,7 @@
 {
   "domain": "wsound",
   "name": "WSound",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "documentation": "https://github.com/seubi42/wsound-homeassistant",
   "issue_tracker": "https://github.com/seubi42/wsound-homeassistant/issues",
   "codeowners": [ "@seubi42" ],
