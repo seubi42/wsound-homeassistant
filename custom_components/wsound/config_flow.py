@@ -15,7 +15,7 @@ class WSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            host = user_input[CONF_HOST].strip()
+            host = str(user_input[CONF_HOST]).strip()
             port = int(user_input[CONF_PORT])
 
             try:
@@ -25,7 +25,6 @@ class WSoundConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             except Exception:
                 errors["base"] = "unknown"
             else:
-                # Unique ID simple (tu pourras l’améliorer plus tard avec un /json/info)
                 await self.async_set_unique_id(f"wsound_{host}_{port}")
                 self._abort_if_unique_id_configured()
 

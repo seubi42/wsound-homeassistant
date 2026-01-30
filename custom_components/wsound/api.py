@@ -29,7 +29,7 @@ class WSoundApiClient:
                 resp.raise_for_status()
                 data = await resp.json()
                 if not isinstance(data, dict):
-                    raise WSoundApiError("Invalid JSON (expected object)")
+                    raise WSoundApiError("Invalid JSON response (expected object)")
                 return data
         except (ClientError, asyncio.TimeoutError, ValueError) as e:
             raise WSoundApiError(str(e)) from e
@@ -52,7 +52,7 @@ class WSoundApiClient:
                 resp.raise_for_status()
                 data = await resp.json()
                 if not isinstance(data, dict):
-                    raise WSoundApiError("Invalid JSON (expected object)")
+                    raise WSoundApiError("Invalid JSON response (expected object)")
                 if data.get("ok") is not True:
                     raise WSoundApiError(f"Device returned ok={data.get('ok')}")
                 return data
@@ -70,17 +70,23 @@ class WSoundApiClient:
         try:
             async with self._session.post(url, params=params, timeout=10) as resp:
                 resp.raise_for_status()
-                data = await resp.json()
-                if isinstance(data, dict) and data.get("ok") is False:
-                    raise WSoundApiError("apply_defaults failed")
-                return data if isinstance(data, dict) else {"ok": True}
+                try:
+                    data = await resp.json()
+                    return data if isinstance(data, dict) else {"ok": True}
+                except Exception:
+                    return {"ok": True}
         except (ClientError, asyncio.TimeoutError, ValueError) as e:
             raise WSoundApiError(str(e)) from e
 
-    async def scenario_start(self, folder: str | None = None, duration: int | None = None,
-                             fade: int | None = None, volume: int | None = None) -> dict[str, Any]:
+    async def scenario_start(
+        self,
+        folder: str | None = None,
+        duration: int | None = None,
+        fade: int | None = None,
+        volume: int | None = None,
+    ) -> dict[str, Any]:
         url = f"{self.base_url}/api/scenario/start"
-        params = {}
+        params: dict[str, Any] = {}
         if folder is not None:
             params["folder"] = folder
         if duration is not None:
@@ -91,9 +97,8 @@ class WSoundApiClient:
             params["volume"] = int(volume)
 
         try:
-            async with self._session.post(url, params=params or None, timeout=10) as resp:
+            async with self._session.post(url, params=(params or None), timeout=10) as resp:
                 resp.raise_for_status()
-                # selon ton firmware, ça peut renvoyer du JSON ou juste ok
                 try:
                     data = await resp.json()
                     return data if isinstance(data, dict) else {"ok": True}
