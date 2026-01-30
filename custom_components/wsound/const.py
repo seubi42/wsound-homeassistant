@@ -6,9 +6,13 @@ CONF_HOST = "host"
 CONF_PORT = "port"
 DEFAULT_PORT = 80
 
-COORDINATOR_UPDATE_INTERVAL_SECONDS = 5
+# Options
+CONF_FOLDERS_COUNT = "folders_count"
+CONF_POLL_INTERVAL = "poll_interval"
 
-# Defaults / ranges (tes valeurs)
+DEFAULT_FOLDERS_COUNT = 10
+DEFAULT_POLL_INTERVAL = 5
+
 DEFAULT_FOLDER = "01"
 
 VOLUME_MIN = 0
